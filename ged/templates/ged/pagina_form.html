@@ -1,0 +1,80 @@
+{% extends 'ged/base.html' %}
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% block content %}
+<div class="col-12 col-md-6">
+<h3 class="my-4">Documentos
+  <small><span class="badge badge-secondary ud_bt">{{livro.titulo}}</span></small>
+</h3>
+<form method="POST" action='{{ action }}' enctype="multipart/form-data" id="form_pagina">{% csrf_token %}
+	{% for field in form %}
+    {% if field.errors %}
+      <div class="form-group">
+        <label for="id_{{ field.name }}" class="col-form-label">{{ field.label }}</label>
+        {{ field|add_class:"form-control"}}
+        <span></span>
+        <div>
+          {% for error in field.errors %}{{ error }}{% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <div class="form-group">
+        <label for="id_{{ field.name }}" class="col-form-label">{{ field.label }}</label>
+        {{ field|add_class:"form-control" }}
+        {% if field.help_text %}
+          <div>{{ field.help_text }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+  <button type="submit" class="btn btn-primary">Salvar</button>
+</form>
+ <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Enviando ...</h4>
+        </div>
+        <div class="modal-body">
+          <div class="prog">
+            <div class="prog" style="width: 100%;text-align: center;" >
+              <div class="alert alert-success" style="display:none;">
+                <strong>Sucesso!</strong> Operação realizada com sucesso.
+              </div>
+              <div class="alert alert-danger" style="display:none;">
+                <strong>Desculpe!</strong> Não foi possível realizar operação.
+              </div>
+              <div id="im_result">
+                <img src="/media/image/progresso.gif">
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+</div>
+
+<div class="col-12 col-md-6">
+  <div>
+    {% if form.instance.id %}
+      {% if anterior %}
+        <a style="float: left;" id="bt_ant" class="btn btn-info pull-right" href="{% url 'ged:pagina_edit_p' %}" alt="{{form.instance.id}}||{{livro}}" >Anterior</a>
+      {% endif %}
+      {% if proximo %}
+        <a style="float: right;" id="bt_pro" class="btn btn-info pull-right" href="{% url 'ged:pagina_edit_p' %}" alt="{{form.instance.id}}||{{livro}}" >Proximo</a>
+      {% endif %}
+    {% endif %}
+  </div>
+  <div>
+    <embed src="{{arquivo}}" width= "100%" height= "450">
+  </div>
+</div>
+{% endblock content %}
+{% block javascript %}
+  <script src="{% static 'ged/bootstrap/js/jquery.ui.widget.js' %}"></script>
+  <script src="{% static 'ged/bootstrap/js/jquery.iframe-transport.js' %}"></script>
+  <script src="{% static 'ged/bootstrap/js/jquery.fileupload.js' %}"></script>
+
+{% endblock %}

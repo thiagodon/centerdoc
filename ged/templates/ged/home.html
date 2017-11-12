@@ -1,0 +1,155 @@
+{% extends 'ged/base.html' %}
+
+{% block content %}
+  <div class="container ">
+    <form class="form-inline my-2 my-lg-0" action="{{action}}" method="POST">
+      {% csrf_token %}
+        <input class="form-control mr-sm-2 col-md-8" type="text" id="txt_busca" name="txt_busca" placeholder="Busca">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Buscar</button>
+    </form>
+  </div>
+{% if pastas %}
+<div class="col-12 col-md-9">
+  {% if tp  or filtros %}
+    <div id="filtros_busca">
+      Filtro: <span class="badge badge-pill badge-info">{{tp}}</span>
+    </div>
+  {% endif %}
+  <div class="row" >
+    <div class="col-md-9">
+      <h3 class="my-2">{{titulo}}</h3>
+    </div>
+    <div class="col-md-3 my-2" >
+      <ul class="pagination" style="float: right;">
+        {% if pastas.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ pastas.previous_page_number }}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+            <span class="sr-only">Anterior</span>
+          </a>
+        </li>
+        {% endif %}
+        <li class="page-item page-link">
+          {{ pastas.number }}  de {{ pastas.paginator.num_pages }}
+        </li>
+        {% if pastas.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ pastas.next_page_number }}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+              <span class="sr-only">Próxima</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    {% for pasta in pastas.object_list %}
+    <div class="col-lg-2 col-sm-6 portfolio-item">
+      <div class="card h-100">
+        {% if pasta.tipo == 'l'%}
+          <a href="{% url 'ged:home_livro' pk=pasta.id %}" >
+            <img class="card-img-top" src="/media/image/livros.png" alt="">
+            <div class="card-body">
+              <h4 class="card-title small">
+                  {{pasta.titulo}}
+              </h4>
+            </div>
+          </a>
+        {% endif %}
+        {% if pasta.tipo == 'g'%}
+          <a href="{% url 'ged:home_tipo' pk=pasta.id %}" >
+            <img class="card-img-top" src="/media/image/grupo.png" alt="">
+            <div class="card-body">
+              <h4 class="card-title small">
+                  {{pasta.titulo}}
+              </h4>
+            </div>
+          </a>
+        {% endif %}
+        {% if pasta.tipo == 'p'%}
+          <a href="{% url 'ged:pagina_edit' pk=pasta.id %}" >
+            <img class="card-img-top" src="/media/image/pagina.png" alt="">
+            <div class="card-body">
+              <h4 class="card-title small">
+                  {{pasta.titulo}}
+              </h4>
+          </a>
+              <p class="card-text small text-right">
+                {{pasta.usuario}}
+                {{pasta.data|date:" d/m/Y" }}
+              </p>
+            </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- /.row -->
+  <!-- Pagination -->
+  <ul class="pagination justify-content-center">
+    {% if pastas.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ pastas.previous_page_number }}" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Anterior</span>
+      </a>
+    </li>
+    {% endif %}
+    <li class="page-item page-link">
+      {{ pastas.number }}  de {{ pastas.paginator.num_pages }}
+    </li>
+    {% if pastas.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ pastas.next_page_number }}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+          <span class="sr-only">Próxima</span>
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</div>
+{% else %}
+<div class="col-12 col-md-9">
+  <div class="row" >
+    <div class="col-md-9">
+      <h3 class="my-2">{{titulo}}</h3>
+      <p>Não há registros</p>
+    </div>  
+  </div>
+</div>
+
+{% endif %}
+
+<div class="col-12 col-md-3" id="sidebar">
+      {% if tp == "Livro" %}
+        <a class="btn btn-primary btn-lg btn-block btn-home" href="{% url 'ged:pagina_new_livro' livro_pk=filtro_id %}">Adicionar ao {{titulo}}</a>
+      {% endif %}
+      {% if tp == "Tipo de Documento" %}
+        <a class="btn btn-primary btn-lg btn-block btn-home" href="{% url 'ged:pagina_new_tipo' tipo_pk=filtro_id %}">Adicionar ao {{titulo}}</a>
+      {% endif %}
+    <a href="{% url 'ged:livro_new' %}" class="btn btn-primary btn-lg btn-block btn-home">Novo Livro</a>
+    <a href="{% url 'ged:pagina_new_livro' livro_pk=0 %}" class="btn btn-primary btn-lg btn-block btn-home">Novo Documento</a>
+</div>
+
+ <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Buscando ...</h4>
+        </div>
+        <div class="modal-body">
+          <div class="prog">
+            <div class="prog" style="width: 100%;text-align: center;" >
+              <div id="im_result">
+                <img src="/media/image/progresso.gif">
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock content %}

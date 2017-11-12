@@ -1,0 +1,39 @@
+{% extends 'ged/base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<div class="col-12 col-md-8">
+<h3 class="my-4">Empresa
+  <small>
+    {% if readonly %}
+      <a class="btn btn-primary ud_bt" href="{% url 'ged:empresa_edit' %}">Editar</a>
+    {% endif %}
+  </small>
+</h3>
+<form method="POST" action="{{ action }}">{% csrf_token %}
+	{% for field in form %}
+    {% if field.errors %}
+      <div class="form-group">
+        <label for="id_{{ field.name }}" class="col-form-label">{{ field.label }}</label>
+        {{ field|add_class:"form-control" }}
+        <span></span>
+        <div>
+          {% for error in field.errors %}{{ error }}{% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <div class="form-group">
+        <label for="id_{{ field.name }}" class="col-form-label">{{ field.label }}</label>
+        {{ field|add_class:"form-control" }}
+        {% if field.help_text %}
+          <div>{{ field.help_text }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+  {% if not readonly %}
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a class="btn btn-danger" href="{% url 'ged:empresa' %}">Cancelar</a>
+  {% endif %}
+</form>
+</div>
+{% endblock content %}

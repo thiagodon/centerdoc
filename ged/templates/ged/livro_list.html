@@ -1,0 +1,19 @@
+{% extends 'ged/base.html' %}
+{% block content %}
+<div class="col-12 col-md-8">
+<h3 class="my-4">Livros
+  <small><a class="btn btn-secondary ud_bt" href="{% url 'ged:livro_new' %}">Adicionar</a></small>
+</h3>
+	<div class="panel list-group">
+ 		{% for livro in livros %}	
+ 		<span class="list-group-item">
+ 			{{ livro.titulo }}
+ 			<span class="ud_bt">
+				<a href="{% url 'ged:livro_edit' pk=livro.pk %}"><span class="glyphicon glyphicon-edit"></span></a>
+				<a class="confirm-remove" href="{% url 'ged:livro_del' pk=livro.pk %}"><span class="glyphicon glyphicon-trash"></span></a>
+			</span>
+ 		</span>
+		{% endfor %}
+  </div>
+</div> 
+{% endblock content %}

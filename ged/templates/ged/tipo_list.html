@@ -1,0 +1,20 @@
+{% extends 'ged/base.html' %}
+{% block content %}
+
+<div class="col-12 col-md-8">
+<h3 class="my-4">Tipo de Documentos
+  <small><a class="btn btn-secondary ud_bt" href="{% url 'ged:tipo_new' %}">Adicionar</a></small>
+</h3>
+	<div class="panel list-group">
+ 		{% for tipo in grupos %}	
+			<span class="list-group-item" >
+				{{ tipo.nome }}
+				<span class="ud_bt">
+					<a href="{% url 'ged:tipo_edit' pk=tipo.pk %}"><span class="glyphicon glyphicon-edit pull-right" ></span></a>
+					<a class="confirm-remove" href="{% url 'ged:tipo_del' pk=tipo.pk %}"><span class="glyphicon glyphicon-trash pull-right"></span></a>
+				</span>
+			</span>
+		{% endfor %}
+  </div>
+</div> 
+{% endblock content %}

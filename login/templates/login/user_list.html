@@ -1,0 +1,20 @@
+{% extends 'ged/base.html' %}
+{% block content %}
+
+<div class="col-12 col-md-8">
+<h3 class="my-4">Usuários
+  <small><a class="btn btn-secondary ud_bt" href="{% url 'login:signup' %}">Adicionar</a></small>
+</h3>
+	<div class="panel list-group">
+ 		{% for usuario in users %}	
+ 		<span class="list-group-item">
+ 			{{ usuario.get_full_name }} ({{usuario.username}})
+			<span class="ud_bt">
+				<a href="{% url 'login:edit' pk=usuario.pk %}"><span class="glyphicon glyphicon-edit pull-right"></span></a>
+				<a class="confirm-remove" href="{% url 'login:delete' pk=usuario.pk %}"><span class="glyphicon glyphicon-trash pull-right"></span></a>
+			</span>
+ 		</span>
+		{% endfor %}
+  </div>
+</div>
+{% endblock content %}

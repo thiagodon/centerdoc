@@ -1,0 +1,6 @@
+Django==1.11.5
+django-progressbarupload==0.1.7
+django-widget-tweaks==1.4.1
+Pillow==4.3.0
+Wand==0.4.4
+pyocr==0.4.7

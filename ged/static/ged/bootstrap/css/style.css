@@ -1,0 +1,56 @@
+body {
+  padding-top: 54px;
+}
+
+@media (min-width: 992px) {
+  body {
+    padding-top: 56px;
+  }
+}
+
+
+.portfolio-item {
+  margin-bottom: 30px;
+}
+
+.pagination {
+  margin-bottom: 30px;
+}
+
+body > .container {
+	padding-top: 20px;
+}
+
+textarea{
+	height: 42px;
+}
+
+.ud_bt{
+  float: right;
+}
+
+.alert{
+  display: none;
+}
+
+.btn-home{
+  font-size: 14px;
+}
+
+.card-text{
+  color: gray;
+} 
+
+#formLogin{
+  padding: 15px; 
+  min-width:300px;
+  font-size: 12px;
+}
+
+.navbar-fixed-bottom{
+  font-size: 12px;
+}
+
+.center{
+  min-height: 400px;
+}

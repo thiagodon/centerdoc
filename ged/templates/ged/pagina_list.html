@@ -1,0 +1,15 @@
+{% extends 'ged/base.html' %}
+{% block content %}
+<h1 class="my-4">Documentos
+  <small>Lista</small>
+</h1>
+<a href="{% url 'ged:pagina_new' %}">Novo</a>
+<ul>
+{% for pagina in paginas %}
+	<li>
+		{{ pagina.titulo }}
+		<a href="{% url 'ged:pagina_edit' pk=pagina.pk %}">Edit</a>
+	</li>
+{% endfor %}
+</ul>
+{% endblock content %}
