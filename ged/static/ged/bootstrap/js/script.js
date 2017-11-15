@@ -33,7 +33,7 @@ $('#form_pagina').on('submit', function(e){
             }, 3000);
         }
     },  
-    });	
+    }); 
 });
 $('.confirm-remove').on('click', function(){
     return confirm('Deseja realmente remover?');
@@ -63,5 +63,3 @@ $('#bt_ant').on('click', function(e){
         window.location.href = data.url;
     });
 });
-
-

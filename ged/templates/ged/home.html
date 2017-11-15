@@ -20,6 +20,9 @@
       <h3 class="my-2">{{titulo}}</h3>
     </div>
     <div class="col-md-3 my-2" >
+      {% if tp  or filtros %}
+      <a class="btn btn-info" href="{% url 'ged:home' %}">Voltar</a>      
+      {% endif %}
       <ul class="pagination" style="float: right;">
         {% if pastas.has_previous %}
         <li class="page-item">
@@ -77,7 +80,7 @@
           </a>
               <p class="card-text small text-right">
                 {{pasta.usuario}}
-                {{pasta.data|date:" d/m/Y" }}
+                {{pasta.data|date:"d/m/Y" }}
               </p>
             </div>
         {% endif %}

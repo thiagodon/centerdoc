@@ -3,6 +3,7 @@
 {% block content %}
 <div class="col-12 col-md-6">
 <h3>Livro</h3>
+
 <form method="POST" action="{{ action }}" enctype="multipart/form-data">{% csrf_token %}
 	{% for field in form %}
     {% if field.errors %}
@@ -26,6 +27,7 @@
   {% endfor %}
   <button type="submit" class="btn btn-primary">Salvar</button>
   <a class="btn btn-danger" href="{% url 'ged:livro_list' %}">Cancelar</a>
+  <a class="btn btn-info" href="{% url 'ged:home' %}">Voltar</a>
   {% if form.instance.id %}
     <a style="float: right;" class="btn btn-info pull-right" href="{% url 'ged:pagina_new_livro' livro_pk=form.instance.id %}">Adicionar Páginas</a>
   {% endif %}

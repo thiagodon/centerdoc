@@ -1,0 +1,71 @@
+{% extends 'ged/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<div class="col-12 col-md-8">
+<h3 class="my-4">Backup
+<div class="row ud_bt" id="divDownload">
+ <a id="bt_backup" class="btn btn-secondary" href="{% url 'ged:backup' %}">Gerar Backup</a>
+ <div id="download"></div>
+
+</div>
+</h3>
+	<div class="panel list-group">
+ 		{% for backup in backups %}	
+ 		<span class="list-group-item">
+ 			Realizado por {{ bakcup.username }} em {{backup.data|date:"d/m/Y"}}
+ 		</span>
+		{% endfor %}
+  </div> 
+   <div class="col-md-7 my-2" >
+      <ul class="pagination" style="float: right;">
+        {% if backups.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ backups.previous_page_number }}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+            <span class="sr-only">Anterior</span>
+          </a>
+        </li>
+        {% endif %}
+        <li class="page-item page-link">
+          {{ backups.number }}  de {{ backups.paginator.num_pages }}
+        </li>
+        {% if backups.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ backups.next_page_number }}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+              <span class="sr-only">Próxima</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+</div>
+ <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Realizando Backup ...</h4>
+        </div>
+        <div class="modal-body">
+          <div class="prog">
+            <div class="prog" style="width: 100%;text-align: center;" >
+              <div class="alert alert-success" style="display:none;">
+                <strong>Sucesso!</strong> Operação realizada com sucesso.
+              </div>
+              <div class="alert alert-danger" style="display:none;">
+                <strong>Desculpe!</strong> Não foi possível realizar operação.
+              </div>
+              <div id="im_result">
+                <img src="/media/image/progresso.gif">
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock content %}
+{% block javascript %}
+  <script src="{% static 'ged/bootstrap/js/backup.js' %}"></script>
+{% endblock %}

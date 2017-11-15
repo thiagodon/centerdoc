@@ -16,5 +16,28 @@
 			</span>
 		{% endfor %}
   </div>
+  <div class="col-md-7 my-2" >
+      <ul class="pagination" style="float: right;">
+        {% if grupos.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ grupos.previous_page_number }}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+            <span class="sr-only">Anterior</span>
+          </a>
+        </li>
+        {% endif %}
+        <li class="page-item page-link">
+          {{ grupos.number }}  de {{ grupos.paginator.num_pages }}
+        </li>
+        {% if grupos.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ grupos.next_page_number }}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+              <span class="sr-only">Próxima</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
 </div> 
 {% endblock content %}

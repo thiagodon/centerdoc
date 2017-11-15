@@ -26,6 +26,9 @@ urlpatterns = [
     url(r'^pagina/editp/$', views.pagina_edit_p, name='pagina_edit_p'),
     url(r'^pagina/(?P<livro_pk>\d+)/new/$', views.pagina_new, name='pagina_new_livro'),
     url(r'^pagina/(?P<tipo_pk>\d+)/new_tipo/$', views.pagina_new_tipo, name='pagina_new_tipo'),
+    url(r'^pagina/(?P<pk>\d+)/del/$', views.pagina_del, name='pagina_del'),
+    url(r'^backup_list/$', views.backup_list, name='backup_list'),
+    url(r'^backup/$', views.backup, name='backup'),
     # url(r'^pagina/new/$', views.pagina_newj, name='pagina_new'),
 ]
 if settings.DEBUG:

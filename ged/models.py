@@ -70,7 +70,7 @@ class Pagina(models.Model):
 	palavras_chave = models.CharField(verbose_name='Palavras chave', max_length = 200)
 	pagina = models.IntegerField(verbose_name='Página número')
 	arquivo = models.FileField()
-	texto = models.TextField(verbose_name='Informaçẽos')
+	texto = models.TextField(verbose_name='Informações')
 	inicio = models.TextField(verbose_name='Inicia com')
 	fim = models.TextField(verbose_name='Termina com')
 	removido = models.BooleanField(default=False)
@@ -87,3 +87,7 @@ class Pagina(models.Model):
 class NomePagina(models.Model):
 	nome = models.CharField(verbose_name="Nome Citado", max_length=255, blank=True, null=True)
 	pagina = models.ForeignKey('Pagina', verbose_name='Pagina', related_name='nome_pagina', on_delete=models.CASCADE, blank=True, null=True)
+
+class Backup(models.Model):
+	user_add = models.IntegerField()
+	date_add = models.DateField()

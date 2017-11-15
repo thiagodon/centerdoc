@@ -28,6 +28,20 @@
     {% endif %}
   {% endfor %}
   <button type="submit" class="btn btn-primary">Salvar</button>
+  {% if livro %}
+  <a class="btn btn-info" href="{% url 'ged:home_livro' pk=livro.pk %}">Voltar</a>
+  {% endif %}
+  {% if not livro %}
+    {% if form.instance.tipo %}
+      <a class="btn btn-info" href="{% url 'ged:home_tipo' pk=form.instance.tipo.pk %}">Voltar</a>
+    {% else %}
+      <a class="btn btn-info" href="{% url 'ged:home' %}">Voltar</a>
+    {% endif %}
+  {% endif %}
+  {% if form.instance.id %}
+  <a class="btn btn-danger confirm-remove" href="{% url 'ged:pagina_del' pk=form.instance.id %}">Apagar</a>
+  {% endif %}
+
 </form>
  <div class="modal fade" id="modal-progress" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog">
