@@ -100,7 +100,7 @@ def home(request):
 def home_busca(request):
 	pastas = []
 	if request.method=="POST":		
-		paginas = Pagina.objects.filter(removido=False, texto__icontains=request.POST.get('txt_busca')).order_by('pagina', 'documento', 'tipo' 'pk')
+		paginas = Pagina.objects.filter(removido=False, texto__icontains=request.POST.get('txt_busca')).order_by('pagina', 'documento', 'tipo', 'pk')
 		for pagina in paginas:
 			p = Pasta()
 			p.titulo = pagina.tipo.nome
@@ -570,7 +570,7 @@ def livro_list(request):
 	livros = Documento.objects.filter(removido=False)
 	paginator = Paginator(livros, 12)
 	try:
-		page = int(request.GET.get('page', '1'))
+		page = int(request.GET.get('page', '1'))	
 	except ValueError:
 		page = 1
 

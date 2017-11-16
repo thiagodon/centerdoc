@@ -3,6 +3,13 @@
 {% load staticfiles %}
 {% block content %}
 <div class="col-12 col-md-6">
+  {% if livro %}
+      <a class="btn btn-primary" href="{% url 'ged:pagina_new_livro' livro_pk=livro.pk %}">Adicionar</a>
+  {% else %}
+    {% if form.instance.tipo %}
+      <a class="btn btn-primary" href="{% url 'ged:pagina_new_tipo' tipo_pk=form.instance.tipo.pk %}">Adicionar</a>
+    {% endif %}
+  {% endif %}
 <h3 class="my-4">Documentos
   <small><span class="badge badge-secondary ud_bt">{{livro.titulo}}</span></small>
 </h3>
@@ -27,7 +34,7 @@
       </div>
     {% endif %}
   {% endfor %}
-  <button type="submit" class="btn btn-primary">Salvar</button>
+  <button type="submit" class="btn btn-primary" {% if form.instance.texto %} disabled {% endif %}>Salvar</button>
   {% if livro %}
   <a class="btn btn-info" href="{% url 'ged:home_livro' pk=livro.pk %}">Voltar</a>
   {% endif %}
