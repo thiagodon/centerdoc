@@ -26,6 +26,8 @@ from unicodedata import normalize
 #backup
 from shutil import make_archive
 import datetime
+import json
+from django.core import serializers
 
 class Pasta:
 		titulo = None
@@ -546,6 +548,69 @@ def pagina_edit(request, pk):
 	return render(request, 'ged/pagina_form.html', {'form': form, 'livro':livro, 'anterior': anterior, 'proximo': proximo, 'action': action, 'arquivo': arquivo})
 
 @login_required(login_url='login:login')
+def pagina_edit_e(request, pk):
+	time.sleep(.300)
+	pagina = Pagina.objects.get(pk=pk)
+	livro = pagina.documento
+	if request.method=="POST":
+		old_pagina = Pagina.objects.get(pk=pk)
+		form = PaginaFormJ(request.POST, request.FILES, instance=pagina)
+		if form.is_valid():
+			pagina = form.save(commit=False)
+			if pagina.documento:
+				if old_pagina.pagina != pagina.pagina:
+					_p = Pagina.objects.filter(removido=False, documento=pagina.documento, pagina=pagina.pagina)
+					if _p != old_pagina:
+						_p = Pagina.objects.filter(removido=False, documento=pagina.documento).order_by('pagina').last()
+						pagina.pagina = _p.pagina+1
+
+			if old_pagina.arquivo != pagina.arquivo:
+				pagina.arquivo.name = 'arquivos/'+pagina.tipo.pasta+'/'+pagina.arquivo.name
+			pagina.user_up = request.user.pk
+			pagina.date_up = timezone.now()
+			pagina.save()
+			data = {'is_valid': True, 'url': reverse('ged:pagina_edit', kwargs={'pk': pagina.pk }) }
+			return JsonResponse(data)
+		else:
+			data = {'is_valid': False, 'url': reverse('ged:pagina_new_livro', kwargs={'livro_pk': (pagina.documento and pagina.documento.pk or 0) }) }
+			return JsonResponse(data)
+	else:
+		form = PaginaFormJ(instance=pagina)
+		# handle_uploaded_file(get_imagem(pagina.arquivo.name))
+		arquivo = pagina.arquivo.url
+		#form.fields['tipo'].queryset = Tipo.objects.filter(removido=False)
+		if livro:
+			p = Pagina.objects.filter(removido=False, documento=livro).order_by('pagina')
+			if p.count()>1:
+				if p.last().pagina==pagina.pagina:
+					anterior = True
+					proximo = False
+				else: 
+					anterior = proximo = True
+				if p.last().pagina > pagina.pagina:
+					proximo = True
+					if pagina.pagina > 1:
+						anterior = True
+					else: 
+						anterior = False
+			else:
+				anterior = proximo = False
+		else:
+			p = Pagina.objects.filter(removido=False, pk__lt=pagina.pk)
+			if p:
+				anterior = True
+			else:
+				anterior = False
+			p = Pagina.objects.filter(removido=False, pk__gt=pagina.pk)
+			if p:
+				proximo = True
+			else:
+				proximo = False
+		action = reverse('ged:pagina_edit', kwargs={'pk': pagina.pk })
+		editar = True
+	return render(request, 'ged/pagina_form.html', {'form': form, 'livro':livro, 'anterior': anterior, 'proximo': proximo, 'action': action, 'arquivo': arquivo, 'editar': editar	})
+
+@login_required(login_url='login:login')
 def pagina_edit_p(request):
 	p = Pagina.objects.get(pk=request.GET.get('id'))
 	if request.GET.get('acao')=='prop':
@@ -606,6 +671,31 @@ def backup_list(request):
 @login_required(login_url='login:login')
 def backup(request):
 	time.sleep(.300)
+	arq = open(os.path.join(settings.MEDIA_ROOT,'arquivos/backup.txt'), 'w')
+	texto = []
+	paginas = serializers.serialize('json', Pagina.objects.all())
+	texto.append(paginas)
+	texto.append('\n')
+	texto.append('\n')
+	documentos = serializers.serialize('json', Documento.objects.all())
+	texto.append(documentos)
+	texto.append('\n')
+	texto.append('\n')
+	empresas = serializers.serialize('json', Empresa.objects.all())
+	texto.append(empresas)
+	texto.append('\n')
+	texto.append('\n')
+	tipos = serializers.serialize('json', Tipo.objects.all())
+	texto.append(tipos)
+	texto.append('\n')
+	texto.append('\n')
+	users = serializers.serialize('json', User.objects.all())
+	texto.append(users)
+	texto.append('\n')
+	texto.append('\n')
+	arq.writelines(texto)
+	arq.close()
+
 	make_archive(os.path.join(settings.MEDIA_ROOT,'backups/backup'+timezone.now().strftime('%Y%m%d')), 'zip', os.path.join(settings.MEDIA_ROOT, 'arquivos'))
 	b = Backup(
 			user_add = request.user.pk, 

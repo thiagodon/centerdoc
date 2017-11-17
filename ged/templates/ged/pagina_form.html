@@ -4,7 +4,10 @@
 {% block content %}
 <div class="col-12 col-md-6">
   {% if livro %}
+    {% if not proximo %}
       <a class="btn btn-primary" href="{% url 'ged:pagina_new_livro' livro_pk=livro.pk %}">Adicionar</a>
+    {% endif %}
+
   {% else %}
     {% if form.instance.tipo %}
       <a class="btn btn-primary" href="{% url 'ged:pagina_new_tipo' tipo_pk=form.instance.tipo.pk %}">Adicionar</a>
@@ -34,7 +37,13 @@
       </div>
     {% endif %}
   {% endfor %}
-  <button type="submit" class="btn btn-primary" {% if form.instance.texto %} disabled {% endif %}>Salvar</button>
+  {% if editar or not form.instance.texto %}
+    <button type="submit" class="btn btn-primary">Salvar</button>
+  {% else %}
+    {% if form.instance.id %}
+      <a class="btn btn-primary" href="{% url 'ged:pagina_edit_e' pk=form.instance.id %}">Editar</a>
+    {% endif %}
+  {% endif %}
   {% if livro %}
   <a class="btn btn-info" href="{% url 'ged:home_livro' pk=livro.pk %}">Voltar</a>
   {% endif %}
