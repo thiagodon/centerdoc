@@ -23,6 +23,7 @@ urlpatterns = [
     # url(r'^pagina/new/$', views.pagina_new, name='pagina_new'),
     url(r'^pagina/list/$', views.pagina_list, name='pagina_list'),
     url(r'^pagina/(?P<pk>\d+)/edit/$', views.pagina_edit, name='pagina_edit'),
+    url(r'^pagina/paginacao/$', views.paginacao, name='paginacao'),
     url(r'^pagina/(?P<pk>\d+)/edite/$', views.pagina_edit_e, name='pagina_edit_e'),
     url(r'^pagina/editp/$', views.pagina_edit_p, name='pagina_edit_p'),
     url(r'^pagina/(?P<livro_pk>\d+)/new/$', views.pagina_new, name='pagina_new_livro'),

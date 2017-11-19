@@ -16,6 +16,12 @@
 <h3 class="my-4">Documentos
   <small><span class="badge badge-secondary ud_bt">{{livro.titulo}}</span></small>
 </h3>
+  {% if form.instance.id %}
+    <input id="pagina_id" value="{{form.instance.id}}" type="hidden" />
+  {% endif %}
+  {% if livro %}
+    <input id="livro_id" value="{{livro.pk}}" type="hidden" />
+  {% endif %}
 <form method="POST" action='{{ action }}' enctype="multipart/form-data" id="form_pagina">{% csrf_token %}
 	{% for field in form %}
     {% if field.errors %}
@@ -30,7 +36,11 @@
     {% else %}
       <div class="form-group">
         <label for="id_{{ field.name }}" class="col-form-label">{{ field.label }}</label>
+        {% if field.name == 'pagina' or field.name == 'lado'%}
+        {{ field|add_class:"form-control check_pagina" }}
+        {% else %}
         {{ field|add_class:"form-control" }}
+        {% endif %}
         {% if field.help_text %}
           <div>{{ field.help_text }}</div>
         {% endif %}

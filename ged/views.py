@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .models import Tipo, Empresa, Pagina, Documento, Backup
-from .forms import TipoForm, EmpresaForm, PaginaForm, PaginaFormJ, EmpresaFormRead, DocumentoForm
+from .forms import TipoForm, EmpresaForm, PaginaForm, PaginaFormJ, EmpresaFormRead, DocumentoForm, PaginaFormJRead
 from django.utils import timezone
 import os
 from os import path
@@ -35,6 +35,9 @@ class Pasta:
 		usuario = None
 		id = None
 		tipo = None
+		paginas = None
+		pagina = None
+		livro = None
 
 paginas_list = []
 
@@ -43,7 +46,7 @@ paginas_list = []
 def home(request):
 	livros = Documento.objects.filter(removido=False)
 	_livros = Documento.objects.filter(removido=True)
-	paginas = Pagina.objects.filter(removido=False, documento__isnull=True, tipo__isnull=True).order_by('tipo', 'documento', 'pagina', 'pk')
+	paginas = Pagina.objects.filter(removido=False, documento__isnull=True, tipo__isnull=True).order_by('tipo', 'documento', 'pagina', 'lado', 'pk')
 	grupos = Tipo.objects.filter(removido=False)
 	_grupos = Tipo.objects.filter(removido=True)
 	pastas = []
@@ -52,6 +55,7 @@ def home(request):
 		p.titulo = grupo.nome
 		p.id = grupo.pk
 		p.tipo = 'g'
+		p.paginas = Pagina.objects.filter(removido=False, tipo=grupo.pk).count()
 		pastas.append(p)	
 	for grupo in _grupos:
 		if Pagina.objects.filter(removido=False, tipo=grupo.pk):
@@ -59,12 +63,15 @@ def home(request):
 			p.titulo = grupo.nome
 			p.id = grupo.pk
 			p.tipo = 'g'
+			p.paginas = Pagina.objects.filter(removido=False, tipo=grupo.pk).count()
 			pastas.append(p)
 	for livro in livros:
 		p = Pasta()
 		p.titulo = livro.titulo
 		p.id = livro.pk
 		p.tipo = 'l'
+		if Pagina.objects.filter(removido=False, documento=livro.pk):
+			p.paginas = Pagina.objects.filter(removido=False, documento=livro.pk).order_by('pagina').last().pagina
 		pastas.append(p)
 	for livro in _livros:
 		if Pagina.objects.filter(removido=False, documento=livro.pk):
@@ -72,6 +79,8 @@ def home(request):
 			p.titulo = livro.titulo
 			p.id = livro.pk
 			p.tipo = 'l'
+			if Pagina.objects.filter(removido=False, documento=livro.pk):
+				p.paginas = Pagina.objects.filter(removido=False, documento=livro.pk).order_by('pagina').last().pagina
 			pastas.append(p)
 	for pagina in paginas:
 		p = Pasta()
@@ -80,6 +89,8 @@ def home(request):
 		p.tipo = 'p'
 		p.data = pagina.date_add
 		u = User.objects.get(pk=pagina.user_add)
+		if pagina.documento:
+			p.pagina = str(pagina.pagina)+'('+('Frente' if pagina.lado == 1 else 'Verso')+')'
 		p.usuario = u.username
 		pastas.append(p)
 	paginator = Paginator(pastas, 12)
@@ -102,7 +113,7 @@ def home(request):
 def home_busca(request):
 	pastas = []
 	if request.method=="POST":		
-		paginas = Pagina.objects.filter(removido=False, texto__icontains=request.POST.get('txt_busca')).order_by('pagina', 'documento', 'tipo', 'pk')
+		paginas = Pagina.objects.filter(removido=False, texto__icontains=request.POST.get('txt_busca')).order_by('pagina', 'lado',  'documento', 'tipo', 'pk')
 		for pagina in paginas:
 			p = Pasta()
 			p.titulo = pagina.tipo.nome
@@ -110,6 +121,8 @@ def home_busca(request):
 			p.tipo = 'p'
 			p.data = pagina.date_add
 			u = User.objects.get(pk=pagina.user_add)
+			if pagina.documento:
+				p.pagina = str(pagina.pagina)+'('+('Frente' if pagina.lado == 1 else 'Verso')+')'
 			p.usuario = u.username
 			pastas.append(p)
 	paginator = Paginator(pastas, 12)
@@ -133,7 +146,7 @@ def home_busca(request):
 @login_required(login_url='login:login')
 def home_livro(request, pk):
 	documento = Documento.objects.get(pk=pk)
-	paginas = Pagina.objects.filter(removido=False, documento=pk).order_by('pagina')
+	paginas = Pagina.objects.filter(removido=False, documento=pk).order_by('pagina', 'lado')
 	pastas = []
 	for pagina in paginas:
 		p = Pasta()
@@ -142,6 +155,8 @@ def home_livro(request, pk):
 		p.tipo = 'p'
 		p.data = pagina.date_add
 		u = User.objects.get(pk=pagina.user_add)
+		if pagina.documento:
+			p.pagina = str(pagina.pagina)+'('+('Frente' if pagina.lado == 1 else 'Verso')+')'
 		p.usuario = u.username
 		pastas.append(p)
 	paginator = Paginator(pastas, 12)
@@ -166,7 +181,7 @@ def home_livro(request, pk):
 @login_required(login_url='login:login')
 def home_tipo(request, pk):
 	tipo = Tipo.objects.get(pk=pk)
-	paginas = Pagina.objects.filter(removido=False, tipo=pk, documento__isnull=True).order_by('tipo', 'documento', 'pagina', 'pk')
+	paginas = Pagina.objects.filter(removido=False, tipo=pk, documento__isnull=True).order_by('tipo', 'documento', 'pagina','lado', 'pk')
 	livros = Documento.objects.all()
 	pastas = []
 	for livro in livros:
@@ -175,6 +190,8 @@ def home_tipo(request, pk):
 			p.titulo = livro.titulo
 			p.id = livro.pk
 			p.tipo = 'l'
+			if Pagina.objects.filter(removido=False, documento=livro.pk):
+				p.paginas = Pagina.objects.filter(removido=False, documento=livro.pk).order_by('pagina').last().pagina
 			pastas.append(p)
 	for pagina in paginas:
 		p = Pasta()
@@ -183,6 +200,8 @@ def home_tipo(request, pk):
 		p.tipo = 'p'
 		p.data = pagina.date_add
 		u = User.objects.get(pk=pagina.user_add)
+		if pagina.documento:
+			p.pagina = str(pagina.pagina)+'('+('Frente' if pagina.lado == 1 else 'Verso')+')'
 		p.usuario = u.username
 		pastas.append(p)
 	paginator = Paginator(pastas, 12)
@@ -373,6 +392,7 @@ def pagina_new(request, livro_pk):
 		if form.is_valid():
 			pagina = form.save(commit=False)
 			count=1
+			lado = 1
 			if form.cleaned_data['doc']:
 				documento = Documento.objects.get(pk=form.cleaned_data['doc'])
 				_p = Pagina.objects.filter(removido=False, documento=form.cleaned_data['doc']).order_by('pagina').last()
@@ -388,6 +408,7 @@ def pagina_new(request, livro_pk):
 					tipo = pagina.tipo,
 					texto = pagina.texto,
 					pagina = p,
+					lado = lado,
 					user_add = request.user.pk,
 					date_add = timezone.now(),
 					arquivo = f,
@@ -403,8 +424,17 @@ def pagina_new(request, livro_pk):
 					primeiro = instance
 				count = count + 1
 				if documento:
-					p = p+1
+					if documento.frenteverso:
+						if lado==1:
+							lado = 2
+						else:
+							p = p+1
+							lado = 1
+					else:
+						lado = 1
+						p = p+1
 				else:
+					lado = 1
 					p = 1
 			data = {'is_valid': True, 'url': reverse('ged:pagina_edit', kwargs={'pk': primeiro.pk }) }
 			return JsonResponse(data)
@@ -443,11 +473,13 @@ def pagina_new_tipo(request, tipo_pk):
 				documento = None
 				p = 1
 			count=1
+			lado = 1
 			for f in request.FILES.getlist('arquivo'):
 				instance = Pagina(
 					tipo = pagina.tipo,
 					texto = pagina.texto,
 					pagina = p,
+					lado = lado,
 					user_add = request.user.pk,
 					date_add = timezone.now(),
 					arquivo = f,
@@ -463,8 +495,17 @@ def pagina_new_tipo(request, tipo_pk):
 					primeiro = instance
 				count = count + 1
 				if documento:
-					p =p+1
+					if documento.frenteverso:
+						if lado==1:
+							lado = 2
+						else:
+							p = p+1
+							lado = 1
+					else:
+						lado = 1
+						p = p+1
 				else:
+					lado = 1
 					p = 1
 			data = {'is_valid': True, 'url': reverse('ged:pagina_edit', kwargs={'pk': primeiro.pk }) }
 			return JsonResponse(data)
@@ -489,19 +530,12 @@ def pagina_editj(request):
 def pagina_edit(request, pk):
 	time.sleep(.300)
 	pagina = Pagina.objects.get(pk=pk)
+	old_pagina = Pagina.objects.get(pk=pk)
 	livro = pagina.documento
 	if request.method=="POST":
-		old_pagina = Pagina.objects.get(pk=pk)
 		form = PaginaFormJ(request.POST, request.FILES, instance=pagina)
 		if form.is_valid():
 			pagina = form.save(commit=False)
-			if pagina.documento:
-				if old_pagina.pagina != pagina.pagina:
-					_p = Pagina.objects.filter(removido=False, documento=pagina.documento, pagina=pagina.pagina)
-					if _p != old_pagina:
-						_p = Pagina.objects.filter(removido=False, documento=pagina.documento).order_by('pagina').last()
-						pagina.pagina = _p.pagina+1
-
 			if old_pagina.arquivo != pagina.arquivo:
 				pagina.arquivo.name = 'arquivos/'+pagina.tipo.pasta+'/'+pagina.arquivo.name
 			pagina.user_up = request.user.pk
@@ -513,16 +547,23 @@ def pagina_edit(request, pk):
 			data = {'is_valid': False, 'url': reverse('ged:pagina_new_livro', kwargs={'livro_pk': (pagina.documento and pagina.documento.pk or 0) }) }
 			return JsonResponse(data)
 	else:
-		form = PaginaFormJ(instance=pagina)
+		if pagina.texto:
+			form = PaginaFormJRead(instance=pagina)
+		else:
+			form = PaginaFormJ(instance=pagina)
 		# handle_uploaded_file(get_imagem(pagina.arquivo.name))
 		arquivo = pagina.arquivo.url
 		#form.fields['tipo'].queryset = Tipo.objects.filter(removido=False)
 		if livro:
-			p = Pagina.objects.filter(removido=False, documento=livro).order_by('pagina')
+			p = Pagina.objects.filter(removido=False, documento=livro).order_by('pagina', 'lado')
 			if p.count()>1:
 				if p.last().pagina==pagina.pagina:
-					anterior = True
-					proximo = False
+					if p.last().lado == pagina.lado:
+						anterior = True
+						proximo = False
+					else:
+						anterior = True
+						proximo = True
 				else: 
 					anterior = proximo = True
 				if p.last().pagina > pagina.pagina:
@@ -530,7 +571,10 @@ def pagina_edit(request, pk):
 					if pagina.pagina > 1:
 						anterior = True
 					else: 
-						anterior = False
+						if pagina.lado > 1:
+							anterior=True
+						else:
+							anterior = False
 			else:
 				anterior = proximo = False
 		else:
@@ -551,19 +595,12 @@ def pagina_edit(request, pk):
 def pagina_edit_e(request, pk):
 	time.sleep(.300)
 	pagina = Pagina.objects.get(pk=pk)
+	old_pagina = Pagina.objects.get(pk=pk)
 	livro = pagina.documento
 	if request.method=="POST":
-		old_pagina = Pagina.objects.get(pk=pk)
 		form = PaginaFormJ(request.POST, request.FILES, instance=pagina)
 		if form.is_valid():
 			pagina = form.save(commit=False)
-			if pagina.documento:
-				if old_pagina.pagina != pagina.pagina:
-					_p = Pagina.objects.filter(removido=False, documento=pagina.documento, pagina=pagina.pagina)
-					if _p != old_pagina:
-						_p = Pagina.objects.filter(removido=False, documento=pagina.documento).order_by('pagina').last()
-						pagina.pagina = _p.pagina+1
-
 			if old_pagina.arquivo != pagina.arquivo:
 				pagina.arquivo.name = 'arquivos/'+pagina.tipo.pasta+'/'+pagina.arquivo.name
 			pagina.user_up = request.user.pk
@@ -580,11 +617,15 @@ def pagina_edit_e(request, pk):
 		arquivo = pagina.arquivo.url
 		#form.fields['tipo'].queryset = Tipo.objects.filter(removido=False)
 		if livro:
-			p = Pagina.objects.filter(removido=False, documento=livro).order_by('pagina')
+			p = Pagina.objects.filter(removido=False, documento=livro).order_by('pagina', 'lado')
 			if p.count()>1:
 				if p.last().pagina==pagina.pagina:
-					anterior = True
-					proximo = False
+					if p.last().lado == pagina.lado:
+						anterior = True
+						proximo = False
+					else:
+						anterior = True
+						proximo = True
 				else: 
 					anterior = proximo = True
 				if p.last().pagina > pagina.pagina:
@@ -592,7 +633,10 @@ def pagina_edit_e(request, pk):
 					if pagina.pagina > 1:
 						anterior = True
 					else: 
-						anterior = False
+						if pagina.lado > 1:
+							anterior=True
+						else:
+							anterior = False
 			else:
 				anterior = proximo = False
 		else:
@@ -614,14 +658,32 @@ def pagina_edit_e(request, pk):
 def pagina_edit_p(request):
 	p = Pagina.objects.get(pk=request.GET.get('id'))
 	if request.GET.get('acao')=='prop':
-		pagina = Pagina.objects.filter(removido=False, documento=p.documento.pk, pagina__gt=p.pagina).order_by('pagina').first()
+		pagina = Pagina.objects.filter(removido=False, documento=p.documento.pk, pagina=p.pagina, lado__gt=p.lado).first()
+		if not pagina:
+			pagina = Pagina.objects.filter(removido=False, documento=p.documento.pk, pagina__gt=p.pagina).order_by('pagina', 'lado').first()
 	if request.GET.get('acao')=='antp':
-		pagina = Pagina.objects.filter(removido=False, documento=p.documento.pk, pagina__lt=p.pagina).order_by('pagina').last()
+		pagina = Pagina.objects.filter(removido=False, documento=p.documento.pk, pagina=p.pagina, lado__lt=p.lado).first()
+		if not pagina:
+			pagina = Pagina.objects.filter(removido=False, documento=p.documento.pk, pagina__lt=p.pagina).order_by('pagina', 'lado').last()
 	if request.GET.get('acao')=='proi':
 		pagina = Pagina.objects.filter(removido=False, pk__gt=p.pk, documento__isnull=True).order_by('pk').first()
 	if request.GET.get('acao')=='anti':
 		pagina = Pagina.objects.filter(removido=False, pk__lt=p.pk, documento__isnull=True).order_by('pk').last()
+	print (pagina)
 	data = {'is_valid': True, 'url': reverse('ged:pagina_edit', kwargs={'pk': pagina.pk }) }
+	return JsonResponse(data)
+
+@login_required(login_url='login:login')
+def paginacao(request):
+	p = Pagina.objects.get(pk=request.GET.get('id'))
+	# print(str(request.GET.get('id'))+' - '+str(p.pk)+' - '+str(request.GET.get('livro'))+' - '+str(p.documento.pk) +' - '+str(request.GET.get('lado'))+' - '+str(p.lado)+' - '+str(request.GET.get('pagina')+' - '+str(p.pagina)) )
+	if str(p.pagina) == request.GET.get('pagina') and str(p.lado) == request.GET.get('lado'):
+		data = {'is_valid': True, 'msg': ''}
+		return JsonResponse(data)
+	if not Pagina.objects.filter(removido=False, pagina=request.GET.get('pagina'), lado=request.GET.get('lado')):
+		data = {'is_valid': True, 'msg': ''}
+		return JsonResponse(data)
+	data = {'is_valid': False, 'msg': 'Por favor escolher outra página.'}
 	return JsonResponse(data)
 
 

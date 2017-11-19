@@ -57,6 +57,9 @@
               <h4 class="card-title small">
                   {{pasta.titulo}}
               </h4>
+              {% if pasta.paginas %}
+                <small>Pags:{{pasta.paginas}}</small>
+              {% endif %}
             </div>
           </a>
         {% endif %}
@@ -67,6 +70,9 @@
               <h4 class="card-title small">
                   {{pasta.titulo}}
               </h4>
+              {% if pasta.paginas %}
+                <small>Qtds:{{pasta.paginas}}</small>
+              {% endif %}
             </div>
           </a>
         {% endif %}
@@ -81,6 +87,7 @@
               <p class="card-text small text-right">
                 {{pasta.usuario}}
                 {{pasta.data|date:"d/m/Y" }}
+                <small>Pag:{{pasta.pagina}}</small>
               </p>
             </div>
         {% endif %}
