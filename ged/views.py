@@ -395,9 +395,13 @@ def pagina_new(request, livro_pk):
 			lado = 1
 			if form.cleaned_data['doc']:
 				documento = Documento.objects.get(pk=form.cleaned_data['doc'])
-				_p = Pagina.objects.filter(removido=False, documento=form.cleaned_data['doc']).order_by('pagina').last()
+				_p = Pagina.objects.filter(removido=False, documento=form.cleaned_data['doc']).order_by('pagina', 'lado').last()
 				if _p:
-					p = _p.pagina+1
+					if _p.lado > 1:
+						p = _p.pagina+1
+					else:
+						p = _p.pagina
+						lado = 2
 				else:
 					p = 1
 			else: 
@@ -448,7 +452,14 @@ def pagina_new(request, livro_pk):
 			form = PaginaForm()
 		#form.fields['tipo'].queryset = Tipo.objects.filter(removido=False)
 		action = reverse('ged:pagina_new_livro', kwargs={'livro_pk': 0 }) 
-	return render(request, 'ged/pagina_form.html', {'form': form, 'livro':livro, 'action': action})
+		ultima = Pagina.objects.filter(removido=False, documento=livro.pk).order_by('pagina', 'lado').last()
+		if ultima:
+			lado_livro = (ultima.lado == 1 and 'Frente' or 'Verso')
+		else:
+			lado_livro = 'Frente'
+		tipo_livro = (livro.frenteverso == 0 and 'Não' or 'Sim')
+		infor_livro = {'ultima': (ultima and ultima.pagina or 0), 'lado_livro': lado_livro, 'tipo_livro': tipo_livro}
+	return render(request, 'ged/pagina_form.html', {'form': form, 'livro':livro, 'infor_livro': infor_livro, 'action': action})
 
 @login_required(login_url='login:login')
 def pagina_new_tipo(request, tipo_pk):
@@ -466,7 +477,11 @@ def pagina_new_tipo(request, tipo_pk):
 				documento = Documento.objects.get(pk=form.cleaned_data['doc'])
 				_p = Pagina.objects.filter(removido=False, documento=form.cleaned_data['doc']).order_by('pagina').last()
 				if _p:
-					p = _p.pagina+1
+					if _p.lado > 1:
+						p = _p.pagina+1
+					else:
+						p = _p.pagina
+						lado = 2
 				else:
 					p = 1
 			else: 
@@ -589,6 +604,15 @@ def pagina_edit(request, pk):
 			else:
 				proximo = False
 		action = reverse('ged:pagina_edit', kwargs={'pk': pagina.pk })
+		if livro:
+			ultima = Pagina.objects.filter(removido=False, documento=livro.pk).order_by('pagina', 'lado').last()
+			if ultima:
+				lado_livro = (ultima.lado == 1 and 'Frente' or 'Verso')
+			else:
+				lado_livro = 'Frente'
+			tipo_livro = (livro.frenteverso == 0 and 'Não' or 'Sim')
+			infor_livro = {'ultima': (ultima and ultima.pagina or 0), 'lado_livro': lado_livro, 'tipo_livro': tipo_livro}
+			return render(request, 'ged/pagina_form.html', {'form': form, 'livro':livro, 'infor_livro': infor_livro, 'anterior': anterior, 'proximo': proximo, 'action': action, 'arquivo': arquivo})
 	return render(request, 'ged/pagina_form.html', {'form': form, 'livro':livro, 'anterior': anterior, 'proximo': proximo, 'action': action, 'arquivo': arquivo})
 
 @login_required(login_url='login:login')
@@ -652,6 +676,15 @@ def pagina_edit_e(request, pk):
 				proximo = False
 		action = reverse('ged:pagina_edit', kwargs={'pk': pagina.pk })
 		editar = True
+		if livro:
+			ultima = Pagina.objects.filter(removido=False, documento=livro.pk).order_by('pagina', 'lado').last()
+			if ultima:
+				lado_livro = (ultima.lado == 1 and 'Frente' or 'Verso')
+			else:
+				lado_livro = 'Frente'
+			tipo_livro = (livro.frenteverso == 0 and 'Não' or 'Sim')
+			infor_livro = {'ultima': (ultima and ultima.pagina or 0), 'lado_livro': lado_livro, 'tipo_livro': tipo_livro}
+			return render(request, 'ged/pagina_form.html', {'form': form, 'livro':livro, 'infor_livro': infor_livro, 'anterior': anterior, 'proximo': proximo, 'action': action, 'arquivo': arquivo, 'editar': editar	})
 	return render(request, 'ged/pagina_form.html', {'form': form, 'livro':livro, 'anterior': anterior, 'proximo': proximo, 'action': action, 'arquivo': arquivo, 'editar': editar	})
 
 @login_required(login_url='login:login')

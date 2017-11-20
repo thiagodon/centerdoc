@@ -14,7 +14,11 @@
     {% endif %}
   {% endif %}
 <h3 class="my-4">Documentos
-  <small><span class="badge badge-secondary ud_bt">{{livro.titulo}}</span></small>
+  <small><span class="badge badge-secondary ud_bt" data-toggle="tooltip" data-placement="top" 
+    {% if infor_livro %}
+    title="Frente e Verso: {{infor_livro.tipo_livro}} | Últ. Pág.: {{infor_livro.ultima}}({{infor_livro.lado_livro}})">
+    {% endif %}
+    {{livro.titulo}}</span></small>
 </h3>
   {% if form.instance.id %}
     <input id="pagina_id" value="{{form.instance.id}}" type="hidden" />
