@@ -400,8 +400,11 @@ def pagina_new(request, livro_pk):
 					if _p.lado > 1:
 						p = _p.pagina+1
 					else:
-						p = _p.pagina
-						lado = 2
+						if documento.frenteverso:
+							p = _p.pagina
+							lado = 2
+						else:
+							p = _p.pagina+1
 				else:
 					p = 1
 			else: 
@@ -480,8 +483,11 @@ def pagina_new_tipo(request, tipo_pk):
 					if _p.lado > 1:
 						p = _p.pagina+1
 					else:
-						p = _p.pagina
-						lado = 2
+						if documento.frenteverso:
+							p = _p.pagina
+							lado = 2
+						else:
+							p = _p.pagina+1
 				else:
 					p = 1
 			else: 
